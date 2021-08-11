@@ -1,0 +1,6 @@
+node_modules
+.vscode
+test.js
+test.json
+launcher_accounts.json
+config.json
