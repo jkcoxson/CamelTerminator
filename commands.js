@@ -3,7 +3,7 @@ let minecraftJs = require('./minecraft');
 let settings = require('./config.json');
 module.exports = class commandMan {
     constructor() {
-
+        this.bot = null;
     }
     /**@type {minecraftJs} */
     bot;
@@ -21,7 +21,15 @@ module.exports = class commandMan {
         guild.commands.create({
             name: 'join',
             description: 'Join a specific Minecraft server',
-            options: 
+            options: [
+                {
+                    name: 'server',
+                    description: 'The server to join',
+                    type: 'STRING',
+                    required: true,
+                    choices: this.serverList
+                }
+            ]
         });
         guild.commands.create({
             name: 'leave',
@@ -52,6 +60,10 @@ module.exports = class commandMan {
             description: 'Stop doing whatever the bot is doing'
         });
         guild.commands.create({
+            name: 'idle',
+            description: 'Stop the current job, but still let the bot do background tasks'
+        });
+        guild.commands.create({
             name: 'follow',
             description: 'Blindly follow a player',
             options: [
@@ -60,12 +72,6 @@ module.exports = class commandMan {
                     description: 'Username of the player to follow',
                     type: 'STRING',
                     required: true,
-                    choices: [
-                        {
-                            'name': 'null',
-                            'value': 'null'
-                        }
-                    ]
                 }
             ]
         });
@@ -82,13 +88,7 @@ module.exports = class commandMan {
                             name: 'username',
                             description: 'Username of the player',
                             type: 'STRING',
-                            required: true,
-                            choices: [
-                                {
-                                    name: 'null',
-                                    value: 'null'
-                                }
-                            ]
+                            required: true
                         }
                     ]
                 },
@@ -172,6 +172,10 @@ module.exports = class commandMan {
             description: 'Go find a bed and sleep'
         });
         guild.commands.create({
+            name: 'players',
+            description: 'List all players that the bot can see'
+        });
+        guild.commands.create({
             name: 'destory',
             description: 'Kill a player',
             options: [
@@ -179,13 +183,7 @@ module.exports = class commandMan {
                     name: 'player',
                     description: 'The username of the player to destroy',
                     required: true,
-                    type: 'STRING',
-                    choices: [
-                        {
-                            name: 'null',
-                            value: 'null'
-                        }
-                    ]
+                    type: 'STRING'
                 }
             ]
         });
@@ -196,13 +194,7 @@ module.exports = class commandMan {
                 {
                     name: 'username',
                     description: 'Username of the player to defend',
-                    type: 'STRING',
-                    choices: [
-                        {
-                            name: 'null',
-                            value: 'null'
-                        }
-                    ]
+                    type: 'STRING'
                 }
             ]
         });
@@ -216,7 +208,10 @@ module.exports = class commandMan {
     run(command) {
         switch (command.commandName) {
             case 'join': {
-                
+                if (this.bot !== null) {
+                    command.reply('I\'m already in a server');
+                    return;
+                }
                 // Join the specified server or default if none specified
                 if (command.args.length == 0) {
                     this.bot = new minecraftJs(undefined, undefined, command.interaction, this);
@@ -225,6 +220,17 @@ module.exports = class commandMan {
                     let port = JSON.parse(command.args[0]).port;
                     this.bot = new minecraftJs(address, port, command.interaction, this);
                 }
+                command.reply('Yeeing myself over to the server now');
+                break;
+            }
+            case 'leave': {
+                command.reply('Cleaning up and leaving');
+                this.bot.cleanUp();
+                this.bot = null;
+                break;
+            }
+            case 'status': {
+                //this.bot.jobRunner.gotoCoords()
                 break;
             }
 
@@ -236,7 +242,8 @@ module.exports = class commandMan {
             toSend.push({
                 'name': server.name,
                 'value': JSON.stringify(server)
-            })
-        })
+            });
+        });
+        return (toSend);
     }
 };

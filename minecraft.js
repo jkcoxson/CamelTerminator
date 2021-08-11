@@ -2,6 +2,7 @@
 // jkcoxson
 
 const settings = require('./config.json');
+const runnerJs = require('./jobRunner');
 
 let mineflayer = require('mineflayer');
 const pathfinder = require('mineflayer-pathfinder').pathfinder;
@@ -27,6 +28,7 @@ module.exports = class minecraftBot {
         let por = settings.default.port;
         this.viewed = false;
         commandMan = leCommandMan;
+        this.jobRunner = new runnerJs(this);
         this.channel = interaction.channel;
         this.interaction = interaction;
         if (address !== undefined) {
@@ -126,11 +128,14 @@ module.exports = class minecraftBot {
     defaultMove;
     /**@type {import('minecraft-data')} */
     mcData;
+    jobRunner;
 
 
     cleanUp() {
-        this.bot.viewer.close();
-        this.bot.end();
+        try {
+            this.bot.viewer.close();
+            this.bot.end();
+        } catch { () => { }; }
         this.bot.removeAllListeners();
         this.bot = null;
     }
