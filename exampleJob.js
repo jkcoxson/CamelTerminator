@@ -13,12 +13,13 @@
         'tasks': [
             {
                 'name': 'Say yeet', // name of the task so you know what it's working on
-                'type': 'Chat', // The type of task this is. Each task has different options
-                'message': 'Yeet!'
+                'type': 'chat', // The type of task this is. Each task has different options
+                'message': 'Yeet!',
+                'targets': [] // People to tell the message, if array is empty sends to all players
             },
             {
                 'name': '100 pls',
-                'type': 'Goto Coords', // Go to a specific coordinate
+                'type': 'gotoCoords', // Go to a specific coordinate
                 'break': true, // should the bot break blocks while path finding (default true)
                 'place': true, // should the bot place blocks while path finding (default true)
                 'x': 100,
@@ -27,13 +28,13 @@
             },
             {
                 'name':'Sir, this is a Wendy\'s',
-                'type': 'Kill Mob', // Searches the loaded chunks for a specific mob
+                'type': 'killMob', // Searches the loaded chunks for a specific mob
                 'mob': 'cow', // Minecraft mob name
                 'silentFail': false // If the mob can't be found, send a message and stop (default false)
             },
             {
                 'name': 'I\' rich!!',
-                'type': 'Fetch', // Attempt to find an item in the surrounding area
+                'type': 'fetch', // Attempt to find an item in the surrounding area
                 'item': 'diamond', // Minecraft's name for the item
                 'count': '3', // Just enough for a pickaxe
                 'silentFail': false

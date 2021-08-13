@@ -230,8 +230,20 @@ module.exports = class commandMan {
                 break;
             }
             case 'status': {
-                //this.bot.jobRunner.gotoCoords()
+                let toSend = '__Status__\n';
+                if (this.bot.taskQueue.length > 0) {
+                    toSend += 'Current Job: ' + this.bot.jobTitle + '\n';
+                    toSend += 'Current Task: ' + this.bot.taskQueue[0] + '\n';
+                }
+                toSend += 'Tasks in queue: ' + this.bot.taskQueue.length + '\n';
+                toSend += 'Health: ' + this.bot.bot.health + '\n';
+                toSend += 'Food: ' + this.bot.bot.food + '\n';
+                toSend += 'Position: ' + Math.round(this.bot.bot.entity.position.x) + ', ' + Math.round(this.bot.bot.entity.position.y) + ', ' + Math.round(this.bot.bot.entity.position.z);
+                command.reply(toSend);
                 break;
+            }
+            case 'test': {
+                this.bot.runTests();
             }
 
         }

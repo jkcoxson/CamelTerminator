@@ -2,7 +2,6 @@
 // jkcoxson
 
 const settings = require('./config.json');
-const runnerJs = require('./jobRunner');
 
 let mineflayer = require('mineflayer');
 const pathfinder = require('mineflayer-pathfinder').pathfinder;
@@ -20,6 +19,16 @@ let mcData;
 /**@type {import('./commands')} */
 let commandMan;
 
+// Import all task types
+const chatTask = require('./tasks/chat');
+const destroyPlayerTask = require('./tasks/destroyPlayer');
+const fetchTask = require('./tasks/fetch');
+const followTask = require('./tasks/follow');
+const gotoCoordsTask = require('./tasks/gotoCoords');
+const killMobTask = require('./tasks/killMob');
+
+
+
 const command = require('./command');
 
 module.exports = class minecraftBot {
@@ -27,8 +36,8 @@ module.exports = class minecraftBot {
         let add = settings.default.address;
         let por = settings.default.port;
         this.viewed = false;
+        this.taskQueue = [];
         commandMan = leCommandMan;
-        this.jobRunner = new runnerJs(this);
         this.channel = interaction.channel;
         this.interaction = interaction;
         if (address !== undefined) {
@@ -105,8 +114,7 @@ module.exports = class minecraftBot {
             }
         });
         this.bot.on('onCorrelateAttack', (attacker, victim) => {
-            // Don't just stand around and die, retaliate
-            if (this.displayMission !== 'None') return;
+            // Don't just stand around and die stupid, retaliate
             if (victim.username !== this.bot.username) return;
             if (this.bot.health > 5) {
                 this.bot.pvp.attack(attacker);
@@ -118,18 +126,65 @@ module.exports = class minecraftBot {
                 this.equipBestWeapon();
             }
         });
-
     }
+    /**@type {import('mineflayer').Bot} The Mineflayer bot instance */
     bot;
+    /**@type {import('discord.js').Channel} The channel that the bot was requested from */
     channel;
+    /**@type {import('discord.js').CommandInteraction} Request command interaction*/
     interaction;
+    /**@type {Boolean} Has the bot been originally set up yet */
     viewed;
+    // TODO remove this
     displayMission;
+    // Nobody knows what this does
     defaultMove;
     /**@type {import('minecraft-data')} */
     mcData;
-    jobRunner;
 
+    /**@type {Array<import('./tasks/base')>} */
+    taskQueue;
+    jobTitle;
+    lastResults;
+    taskTitle;
+
+
+
+    // Run the test JSON to make sure the bot is working
+    // todo make GitHub do this
+    runTests() {
+        this.taskQueue = [];
+        let testJSON = require('./testJobs.json');
+        this.jobTitle = testJSON.name;
+        testJSON.tasks.forEach(element => {
+            this.addTask(element);
+        });
+    }
+
+
+    /**
+     * Add a task from a JSON
+     * @param {Object} task Task JSON object
+     * @param {String} task.name
+     * @param {String} task.type
+     */
+    addTask(task) {
+        /**@type {import('./tasks/base')} */
+        let toPush = this.getTaskClass(task.type);
+        console.log(toPush);
+        this.taskQueue.push(new toPush(this, task));
+        if (this.taskQueue.length == 1) this.runTasks();
+    }
+
+    async runTasks() {
+        while (this.taskQueue.length > 0) {
+            this.taskTitle = this.taskQueue[0].name;
+            await this.taskQueue[0].run().then((results) => {
+                this.lastResults = results;
+                this.taskQueue.shift();
+            });
+        }
+    }
 
     cleanUp() {
         try {
@@ -150,11 +205,6 @@ module.exports = class minecraftBot {
         this.displayMission = 'Follow ' + username;
         return ('I\'m on the move towards the target');
     }
-    stopMission() {
-        // Stop pathfinding
-        this.bot.pathfinder.setGoal(null);
-        this.displayMission == 'Stopped';
-    }
 
     goToPlayer(username) {
         this.displayMission = 'Going to ' + username;
@@ -168,16 +218,7 @@ module.exports = class minecraftBot {
         return ('I\'m on the move towards the target');
     }
 
-    goToCoords(x, y, z) {
-        this.displayMission = 'Going to ' + x + ', ' + y + ', ' + z;
-        this.bot.pathfinder.setMovements(this.defaultMove);
-        this.bot.pathfinder.setGoal(new GoalNear(x, y, z, 1));
-        return ('I\'m on the move towards the target');
-    }
-    _GoToCoords(x, y, z) {
-        this.bot.pathfinder.setMovements(this.defaultMove);
-        this.bot.pathfinder.setGoal(new GoalNear(x, y, z, 1));
-    }
+
     destroyPlayer(username) {
         this.displayMission = 'Utterly Destroy ' + username;
         const player = this.bot.players[username];
@@ -339,6 +380,35 @@ module.exports = class minecraftBot {
         }
         if (toSend.length == 0) toSend.push('null');
         return (toSend);
+    }
+
+    /**
+     * Get the class corosponding to the name
+     * @param {String} name Name in the job
+     * @returns {import('./tasks/base')} A task that will be added to the list
+     */
+    getTaskClass(name) {
+        switch (name) {
+            case 'chat': {
+                return (chatTask);
+            }
+            case 'destroyPlayer': {
+                return (destroyPlayerTask);
+            }
+            case 'fetch': {
+                return (fetchTask);
+            }
+            case 'follow': {
+                return (followTask);
+            }
+            case 'gotoCoords': {
+                return (gotoCoordsTask);
+            }
+            case 'killMob': {
+                return (killMobTask);
+            }
+
+        }
     }
 
 };
