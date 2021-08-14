@@ -3,32 +3,17 @@
     "defend": true,
     "tasks": [
         {
-            "name": "Say yeet",
-            "type": "chat",
-            "message": "Yeet!",
-            "targets": []
-        },
-        {
-            "name": "100 pls",
-            "type": "gotoCoords",
-            "break": true,
-            "place": true,
-            "x": 100,
-            "y": 100,
-            "z": 100
-        },
-        {
-            "name": "Sir, this is a Wendy\"s",
-            "type": "killMob",
-            "mob": "cow",
-            "silentFail": false
-        },
-        {
-            "name": "I\" rich!!",
+            "name": "I'm rich!!",
             "type": "fetch",
             "item": "diamond",
-            "count": "3",
+            "count": "10",
             "silentFail": false
+        },
+        {
+            "name": "Moneybags brag",
+            "type": "chat",
+            "message": "I have all the diamonds!",
+            "targets": []
         }
     ]
 }

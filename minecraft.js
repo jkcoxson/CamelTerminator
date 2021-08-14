@@ -171,7 +171,6 @@ module.exports = class minecraftBot {
     addTask(task) {
         /**@type {import('./tasks/base')} */
         let toPush = this.getTaskClass(task.type);
-        console.log(toPush);
         this.taskQueue.push(new toPush(this, task));
         if (this.taskQueue.length == 1) this.runTasks();
     }

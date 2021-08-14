@@ -233,7 +233,7 @@ module.exports = class commandMan {
                 let toSend = '__Status__\n';
                 if (this.bot.taskQueue.length > 0) {
                     toSend += 'Current Job: ' + this.bot.jobTitle + '\n';
-                    toSend += 'Current Task: ' + this.bot.taskQueue[0] + '\n';
+                    toSend += 'Current Task: ' + this.bot.taskQueue[0].name + '\n';
                 }
                 toSend += 'Tasks in queue: ' + this.bot.taskQueue.length + '\n';
                 toSend += 'Health: ' + this.bot.bot.health + '\n';
@@ -244,6 +244,11 @@ module.exports = class commandMan {
             }
             case 'test': {
                 this.bot.runTests();
+                break;
+            }
+            case 'chat': {
+                this.bot.bot.chat(command.args.join(' '));
+                command.reply('Sent');
             }
 
         }
